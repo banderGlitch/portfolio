@@ -2,6 +2,9 @@ function App() {
 
   return (
     <>
+    <div className="flex justify-center items-center h-screen bg-red-500">
+      <h1>Hello World</h1>
+    </div>
     </>
   )
 }
