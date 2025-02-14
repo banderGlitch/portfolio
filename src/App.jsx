@@ -106,7 +106,7 @@ const MainApp = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
           transition={{ duration: 0.5 }}
-          className="h-[calc(80vh-64px)] flex items-center justify-center"
+          className="h-[calc(100vh-64px)] flex items-center justify-center"
         >
           <CurrentComponent />
             {/* Scroll Guide */}
