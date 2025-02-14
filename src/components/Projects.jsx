@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { FaRobot, FaShoppingCart, FaUser } from "react-icons/fa";
 const Projects = () => {
     const isDarkMode = useSelector((state) => state.theme.darkMode);
+    
     const projects = useMemo(() => [
         { 
           title: "AI Chatbot", 
@@ -42,7 +43,7 @@ const Projects = () => {
                 ${isDarkMode ? 'bg-gradient-to-br' : 'bg-white'}
                 ${isDarkMode ? project.gradient : ''}
                 ${isDarkMode ? 'text-white' : 'text-gray-800'}
-                transform transition-all duration-300 hover:shadow-2xl`}
+                transform transition-all duration-300`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}

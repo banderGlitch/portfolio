@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import Hero from "./components/Hero";
 import Contact from "./components/Contact";
 import Projects from "./components/Projects";
+import { FaChevronDown } from 'react-icons/fa'; // Add this import
 import { AnimatePresence, motion } from "framer-motion";
 
 const MainApp = () => {
@@ -87,6 +88,14 @@ const MainApp = () => {
 
   const CurrentComponent = sections[currentSection].component;
 
+
+  const getNextSectionName = () => {
+    if (currentSection < sections.length - 1) {
+      return sections[currentSection + 1].name;
+    }
+    return null;
+  };
+
   return (
     <div className="h-screen overflow-hidden">
       <Navbar />
@@ -97,12 +106,91 @@ const MainApp = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
           transition={{ duration: 0.5 }}
-          className="h-[calc(100vh-64px)] flex items-center justify-center"
+          className="h-[calc(70vh-64px)] flex items-center justify-center"
         >
           <CurrentComponent />
+            {/* Scroll Guide */}
+            {currentSection < sections.length - 1 && (
+            <motion.div
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              {/* Next Section Text */}
+              <motion.p
+                className={`text-sm mb-2 ${
+                  darkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                Scroll down to
+                <span className="font-semibold ml-1">
+                  {getNextSectionName()}
+                </span>
+              </motion.p>
+
+              {/* Animated Scroll Icon */}
+              <motion.div
+                className="flex flex-col items-center"
+                animate={{
+                  y: [0, 10, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <motion.div
+                  className={`w-6 h-10 border-2 rounded-full mb-1 flex justify-center ${
+                    darkMode 
+                      ? 'border-gray-300' 
+                      : 'border-gray-600'
+                  }`}
+                >
+                  <motion.div
+                    className={`w-1 h-2 rounded-full mt-2 ${
+                      darkMode 
+                        ? 'bg-gray-300' 
+                        : 'bg-gray-600'
+                    }`}
+                    animate={{
+                      y: [0, 12, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </motion.div>
+                <motion.div
+                  animate={{
+                    y: [0, 5, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.2,
+                  }}
+                >
+                  <FaChevronDown 
+                    className={`text-xl ${
+                      darkMode 
+                        ? 'text-gray-300' 
+                        : 'text-gray-600'
+                    }`}
+                  />
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
         </motion.div>
       </AnimatePresence>
-    
     </div>
   );
 };
@@ -114,35 +202,4 @@ const App = () => (
 );
 
 export default App;
-// import Navbar from "./components/Navbar";
-// import { Provider } from "react-redux";
-// import store from "./redux/store";
-// import { useEffect } from "react";
-// import { useSelector } from "react-redux";
-// import Hero from "./components/Hero";
-// import Contact from "./components/Contact";
-// import Projects from "./components/Projects";
-// const MainApp = () => {
-//   const darkMode = useSelector((state) => state.theme.darkMode);
 
-//   useEffect(() => {
-//     document.documentElement.classList.toggle("dark", darkMode);
-//   }, [darkMode]);
-
-//   return (
-//     <>
-//       <Navbar />
-//       <Hero />
-//       <Projects />
-//       <Contact />
-//     </>
-//   );
-// };
-
-// const App = () => (
-//   <Provider store={store}>
-//     <MainApp />
-//   </Provider>
-// );
-
-// export default App;
