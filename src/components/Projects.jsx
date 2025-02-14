@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import { FaRobot, FaShoppingCart, FaUser ,FaEthereum , FaGooglePlay} from "react-icons/fa";
-import ethGlobalLogo from "../assets/EthGlobal.png";
+import ethGlobalLogo from "../assets/Ethglobal.png";
 import thirdEyeThoughtsLogo from "../assets/thirdeye.png";
 import innovPlusLogo from "../assets/logo-innov-plus.png";
 const Projects = () => {
