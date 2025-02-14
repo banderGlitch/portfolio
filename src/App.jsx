@@ -106,13 +106,13 @@ const MainApp = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
           transition={{ duration: 0.5 }}
-          className="h-[calc(70vh-64px)] flex items-center justify-center"
+          className="h-[calc(80vh-64px)] flex items-center justify-center"
         >
           <CurrentComponent />
             {/* Scroll Guide */}
             {currentSection < sections.length - 1 && (
             <motion.div
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center"
+              className="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
