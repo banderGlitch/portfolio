@@ -1,9 +1,7 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import { toggleTheme } from "../redux/themeSlice";
-
+import ToggleSwitch from "./ToggleSwitch";
 const Navbar = () => {
-    const dispatch = useDispatch();
     const darkMode = useSelector((state) => state.theme.darkMode);
 
     return (
@@ -13,11 +11,7 @@ const Navbar = () => {
         transition={{ duration: 1 }}
     >
         <h1 className="text-2xl font-bold">My Portfolio</h1>
-        <button onClick={() => dispatch(toggleTheme())}
-            className={`px-4 py-2 rounded-md ${darkMode ? "bg-white text-black" : "bg-black text-white"}`}
-        >
-                {darkMode ? "Light Mode" : "Dark Mode"}
-            </button>
+          <ToggleSwitch />
         </motion.nav>
     )
 }
