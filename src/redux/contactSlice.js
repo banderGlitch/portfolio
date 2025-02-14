@@ -7,11 +7,16 @@ export const contactSlice = createSlice({
         updateField: (state, action) => {
             state[action.payload.field] = action.payload.value;
         },
+        resetForm: (state) => {
+            state.name = "";
+            state.email = "";
+            state.message = "";
+        },
     },
 });
 
 
-export const { updateField } = contactSlice.actions;
+export const { updateField, resetForm } = contactSlice.actions;
 
 export default contactSlice.reducer;
 
