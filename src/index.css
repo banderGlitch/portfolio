@@ -4,6 +4,19 @@
 }
 
 
+/* Default Light Mode */
 body {
+  background-color: white;
+  color: black;
+  transition: background-color 0.5s ease-in-out;
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Dark Mode Styles */
+.dark body {
+  background-color: black;
+  color: white;
 }
