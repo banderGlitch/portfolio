@@ -6,7 +6,9 @@ import ethGlobalLogo from "../assets/Ethglobal.png";
 import thirdEyeThoughtsLogo from "../assets/thirdeye.png";
 import innovPlusLogo from "../assets/logo-innov-plus.png";
 import { useMediaQuery } from 'react-responsive';
+
 const Projects = () => {
+
     const isDarkMode = useSelector((state) => state.theme.darkMode);
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
@@ -40,75 +42,92 @@ const Projects = () => {
         },
     ], []);
 
-    if (isMobile) {
+    const handleTouchStart = (e) => {
+        e.stopPropagation(); // Prevent main scroll from triggering
+    };
+
+    const handleTouchMove = (e) => {
+        e.stopPropagation(); // Prevent main scroll from triggering
+    };
+
+   if (isMobile) {
         return (
-            <div className="w-full h-[calc(100vh-64px)] overflow-y-auto">
+            <div className="w-full h-[calc(100vh-64px)]">
                 <div className="px-4 py-6">
                     <h2 className="text-2xl font-bold mb-6 text-center">Projects</h2>
-                    <div className="space-y-4">
-                        {projects.map((project, index) => (
-                            <motion.div
-                                key={index}
-                                className={`p-4 rounded-xl shadow-lg
-                                    ${isDarkMode ? 'bg-gradient-to-br' : 'bg-white'}
-                                    ${isDarkMode ? project.gradient : ''}
-                                    ${isDarkMode ? 'text-white' : 'text-gray-800'}`}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    {project.icon}
-                                    {project.projectImage && (
-                                        <img
-                                            src={project.projectImage}
-                                            alt={project.title}
-                                            className="h-6 w-auto"
-                                        />
-                                    )}
-                                </div>
+                    
+                    {/* Horizontal Scrolling Container */}
+                    <div 
+                        className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory hide-scrollbar"
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                    >
+                        <div className="flex gap-4 pb-4">
+                            {projects.map((project, index) => (
+                                <motion.div
+                                    key={index}
+                                    className={`flex-shrink-0 w-[85vw] p-4 rounded-xl shadow-lg snap-center
+                                        ${isDarkMode ? 'bg-gradient-to-br' : 'bg-white'}
+                                        ${isDarkMode ? project.gradient : ''}
+                                        ${isDarkMode ? 'text-white' : 'text-gray-800'}`}
+                                    initial={{ opacity: 0, x: 50 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                >
+                                    <div className="flex items-start justify-between mb-3">
+                                        {project.icon}
+                                        {project.projectImage && (
+                                            <img
+                                                src={project.projectImage}
+                                                alt={project.title}
+                                                className="h-6 w-auto"
+                                            />
+                                        )}
+                                    </div>
 
-                                <h3 className="text-lg font-semibold mb-2">
-                                    {project.title}
-                                </h3>
+                                    <h3 className="text-lg font-semibold mb-2">
+                                        {project.title}
+                                    </h3>
 
-                                <p className={`text-sm mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-600'
+                                    <p className={`text-sm mb-3 ${
+                                        isDarkMode ? 'text-gray-200' : 'text-gray-600'
                                     }`}>
-                                    {project.description}
-                                </p>
+                                        {project.description}
+                                    </p>
 
-                                <div className="flex flex-wrap gap-1.5 mb-3">
-                                    {project.technologies.map((tech, i) => (
-                                        <span
-                                            key={i}
-                                            className={`text-xs px-2 py-0.5 rounded-full 
-                                                ${isDarkMode
-                                                    ? 'bg-white/20 text-white'
-                                                    : 'bg-gray-200 text-gray-700'}`}
+                                    <div className="flex flex-wrap gap-1.5 mb-3">
+                                        {project.technologies.map((tech, i) => (
+                                            <span
+                                                key={i}
+                                                className={`text-xs px-2 py-0.5 rounded-full 
+                                                    ${isDarkMode 
+                                                        ? 'bg-white/20 text-white' 
+                                                        : 'bg-gray-200 text-gray-700'}`}
+                                            >
+                                                {tech}
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    {project.link && (
+                                        <motion.a
+                                            href={project.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`block w-full text-center
+                                                px-4 py-2 rounded-lg text-sm
+                                                ${isDarkMode 
+                                                    ? 'bg-white text-gray-800' 
+                                                    : 'bg-gray-800 text-white'}
+                                                active:opacity-90`}
+                                            whileTap={{ scale: 0.98 }}
                                         >
-                                            {tech}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                {project.link && (
-                                    <motion.a
-                                        href={project.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`block w-full text-center
-                                            px-4 py-2 rounded-lg text-sm
-                                            ${isDarkMode
-                                                ? 'bg-white text-gray-800'
-                                                : 'bg-gray-800 text-white'}
-                                            active:opacity-90`}
-                                        whileTap={{ scale: 0.98 }}
-                                    >
-                                        View Project
-                                    </motion.a>
-                                )}
-                            </motion.div>
-                        ))}
+                                            View Project
+                                        </motion.a>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
