@@ -6,14 +6,17 @@ import { useSelector } from "react-redux";
 import Hero from "./components/Hero";
 import Contact from "./components/Contact";
 import Projects from "./components/Projects";
-import { FaChevronDown } from 'react-icons/fa'; // Add this import
+import { FaChevronDown } from 'react-icons/fa';
 import { AnimatePresence, motion } from "framer-motion";
+import { useMediaQuery } from 'react-responsive'; // Install this package: npm install react-responsive
 
 const MainApp = () => {
   const darkMode = useSelector((state) => state.theme.darkMode);
   const [currentSection, setCurrentSection] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
-  
+  const [touchStart, setTouchStart] = useState(null);
+  const isMobile = useMediaQuery({ maxWidth: 768 });
+
   const sections = [
     { component: Hero, name: 'Hero' },
     { component: Projects, name: 'Projects' },
@@ -21,73 +24,98 @@ const MainApp = () => {
   ];
 
   useEffect(() => {
+    const handleSetSection = (event) => {
+      if (!isScrolling) {
+        setIsScrolling(true);
+        setCurrentSection(event.detail.sectionIndex);
+        setTimeout(() => setIsScrolling(false), 1000);
+      }
+    };
+
+    window.addEventListener('setSection', handleSetSection);
+
+    return () => {
+      window.removeEventListener('setSection', handleSetSection);
+    };
+  }, [isScrolling]);
+
+  useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  useEffect(() => {
-    const handleScroll = (e) => {
-      if (isScrolling) return;
+  // Handle touch events for mobile
+  const handleTouchStart = (e) => {
+    setTouchStart(e.touches[0].clientY);
+  };
 
+  const handleTouchMove = (e) => {
+    if (!touchStart || isScrolling) return;
+
+    const touchEnd = e.touches[0].clientY;
+    const diff = touchStart - touchEnd;
+
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
       setIsScrolling(true);
-      
-      // Determine scroll direction
-      const direction = e.deltaY > 0 ? 1 : -1;
-      
+
+      // Determine direction (up or down)
+      const direction = diff > 0 ? 1 : -1;
+
       setCurrentSection(prevSection => {
         const nextSection = prevSection + direction;
-        // Ensure we stay within bounds
         if (nextSection >= 0 && nextSection < sections.length) {
           return nextSection;
         }
         return prevSection;
       });
 
+      // Reset touch start
+      setTouchStart(null);
+
       // Reset scroll lock after delay
       setTimeout(() => {
         setIsScrolling(false);
       }, 1000);
-    };
+    }
+  };
 
-    const handleKeyDown = (e) => {
-      if (isScrolling) return;
+  // Handle mouse wheel for desktop
+  const handleWheel = (e) => {
+    if (isScrolling || isMobile) return;
 
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        setIsScrolling(true);
-        
-        const direction = e.key === 'ArrowDown' ? 1 : -1;
-        
-        setCurrentSection(prevSection => {
-          const nextSection = prevSection + direction;
-          if (nextSection >= 0 && nextSection < sections.length) {
-            return nextSection;
-          }
-          return prevSection;
-        });
+    setIsScrolling(true);
 
-        setTimeout(() => {
-          setIsScrolling(false);
-        }, 1000);
+    const direction = e.deltaY > 0 ? 1 : -1;
+
+    setCurrentSection(prevSection => {
+      const nextSection = prevSection + direction;
+      if (nextSection >= 0 && nextSection < sections.length) {
+        return nextSection;
       }
-    };
+      return prevSection;
+    });
 
-    // Prevent default scroll behavior
-    const preventDefault = (e) => {
-      e.preventDefault();
-    };
+    setTimeout(() => {
+      setIsScrolling(false);
+    }, 1000);
+  };
 
-    window.addEventListener('wheel', handleScroll, { passive: false });
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('wheel', preventDefault, { passive: false });
+  useEffect(() => {
+    if (!isMobile) {
+      window.addEventListener('wheel', handleWheel, { passive: false });
+      window.addEventListener('wheel', preventDefault, { passive: false });
+    }
 
     return () => {
-      window.removeEventListener('wheel', handleScroll);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('wheel', preventDefault);
+      if (!isMobile) {
+        window.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('wheel', preventDefault);
+      }
     };
-  }, [isScrolling, sections.length]);
+  }, [isScrolling, sections.length, isMobile]);
 
-  const CurrentComponent = sections[currentSection].component;
-
+  const preventDefault = (e) => {
+    e.preventDefault();
+  };
 
   const getNextSectionName = () => {
     if (currentSection < sections.length - 1) {
@@ -96,8 +124,14 @@ const MainApp = () => {
     return null;
   };
 
+  const CurrentComponent = sections[currentSection].component;
+
   return (
-    <div className="h-screen overflow-hidden">
+    <div
+      className="h-screen overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+    >
       <Navbar />
       <AnimatePresence mode="wait">
         <motion.div
@@ -106,88 +140,62 @@ const MainApp = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
           transition={{ duration: 0.5 }}
-          className="h-[calc(100vh-64px)] flex items-center justify-center"
+          className="h-[calc(100vh-64px)] flex items-center justify-center relative"
         >
           <CurrentComponent />
-            {/* Scroll Guide */}
-            {currentSection < sections.length - 1 && (
+
+          {/* Navigation Dots and Scroll Guide - Hidden on Mobile */}
+          {!isMobile && currentSection < sections.length - 1 && (
             <motion.div
-              className="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-8"
+              className="fixed right-8 bottom-8 flex flex-col items-center gap-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
             >
-              {/* Next Section Text */}
-              <motion.p
-                className={`text-sm mb-2 ${
-                  darkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2 }}
-              >
-                Scroll down to
-                <span className="font-semibold ml-1">
-                  {getNextSectionName()}
-                </span>
-              </motion.p>
-
-              {/* Animated Scroll Icon */}
-              <motion.div
-                className="flex flex-col items-center"
-                animate={{
-                  y: [0, 10, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <motion.div
-                  className={`w-6 h-10 border-2 rounded-full mb-1 flex justify-center ${
-                    darkMode 
-                      ? 'border-gray-300' 
-                      : 'border-gray-600'
-                  }`}
-                >
-                  <motion.div
-                    className={`w-1 h-2 rounded-full mt-2 ${
-                      darkMode 
-                        ? 'bg-gray-300' 
-                        : 'bg-gray-600'
+              {/* Scroll Guide */}
+              <div className="text-center">
+                <motion.p
+                  className={`text-sm mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'
                     }`}
+                >
+                  Scroll to {getNextSectionName()}
+                </motion.p>
+
+                {/* Animated Mouse Icon */}
+                <div className={`w-5 h-8 rounded-full border-2 ${darkMode ? 'border-gray-300' : 'border-gray-600'
+                  } mx-auto mb-2 relative`}>
+                  <motion.div
+                    className={`w-1 h-1 rounded-full ${darkMode ? 'bg-gray-300' : 'bg-gray-600'
+                      } absolute left-1/2 top-2 -translate-x-1/2`}
                     animate={{
-                      y: [0, 12, 0],
+                      y: [0, 10, 0]
                     }}
                     transition={{
-                      duration: 2,
+                      duration: 1.5,
                       repeat: Infinity,
-                      ease: "easeInOut",
+                      ease: "easeInOut"
                     }}
                   />
-                </motion.div>
-                <motion.div
-                  animate={{
-                    y: [0, 5, 0],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.2,
-                  }}
-                >
-                  <FaChevronDown 
-                    className={`text-xl ${
-                      darkMode 
-                        ? 'text-gray-300' 
-                        : 'text-gray-600'
-                    }`}
-                  />
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             </motion.div>
+          )}
+
+          {/* Mobile Navigation Indicator */}
+          {isMobile && (
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
+              <div className="flex gap-2">
+                {sections.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full ${currentSection === index
+                        ? 'bg-blue-500'
+                        : darkMode ? 'bg-gray-600' : 'bg-gray-300'
+                      }`}
+                  />
+                ))}
+              </div>
+            </div>
           )}
         </motion.div>
       </AnimatePresence>
@@ -202,4 +210,3 @@ const App = () => (
 );
 
 export default App;
-

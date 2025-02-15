@@ -5,12 +5,14 @@ import { FaEnvelope, FaUser, FaLinkedin, FaGithub, FaDownload, FaFilePdf } from 
 import { MdMessage } from "react-icons/md";
 import { useState } from "react";
 import toast, { Toaster } from 'react-hot-toast'; // Add this import
+import { useMediaQuery } from 'react-responsive';
 
 const Contact = () => {
     const dispatch = useDispatch();
     const formData = useSelector((state) => state.contact);
     const isDarkMode = useSelector((state) => state.theme.darkMode);
     const [isDownloading, setIsDownloading] = useState(false);
+    const isMobile = useMediaQuery({ maxWidth: 768 });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -94,9 +96,9 @@ const Contact = () => {
     };
 
     return (
-        <>
+        <div className="h-[calc(100vh-64px)] overflow-y-auto">
        <Toaster
-                position="top-right"
+                position={isMobile ? "bottom-center" : "top-right"}
                 toastOptions={{
                     success: {
                         style: {
@@ -259,7 +261,7 @@ const Contact = () => {
                 </motion.form>
             </div>
         </motion.div>
-        </>
+        </div>
     );
 };
 
