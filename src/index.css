@@ -20,3 +20,151 @@ body {
   background-color: black;
   color: white;
 }
+
+/* 
+.chat-page {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Hide the default BubbleChat button since we're using a custom layout */
+/* .chatbot-button {
+  display: none !important;
+} 
+
+
+.cs-message-input {
+  background-color: var(--background-color) !important;
+}
+
+.cs-message-input__content-editor {
+  background-color: var(--background-color) !important;
+}
+
+.cs-message__content {
+  background-color: var(--message-background) !important;
+} */
+
+/* Chat UI customization */
+
+
+/* .cs-message-input {
+  background-color: #2d2f39 !important;
+  border-radius: 0.5rem !important;
+  border: none !important;
+}
+
+.cs-message-input__content-editor {
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.cs-message-input__content-editor[data-placeholder]:empty:before {
+  color: #9ca3af !important;
+}
+
+.cs-button--send {
+  color: #3B82F6 !important;
+}
+
+.cs-conversation-header {
+  background-color: #1a1c25 !important;
+  color: white !important;
+}
+
+.cs-conversation-header__back-button {
+  color: white !important;
+}
+
+.cs-message-list {
+  background-color: #0f1117 !important;
+}
+
+.cs-typing-indicator {
+  color: #9ca3af !important;
+}
+
+.cs-message--outgoing .cs-message__content {
+  background-color: #3B82F6 !important;
+  color: white !important;
+}
+
+.cs-message--incoming .cs-message__content {
+  background-color: #1e1f29 !important;
+  color: white !important;
+}
+
+
+.cs-message-list__scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+
+.cs-message-list__scroll-wrapper {
+  -ms-overflow-style: none;  /* IE and Edge */
+  /* scrollbar-width: none;  Firefox */
+
+
+
+  /* Custom Stream Chat styles */
+.str-chat {
+  --str-chat__primary-color: #3B82F6;
+  --str-chat__active-primary-color: #2563EB;
+  height: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.str-chat.str-chat-channel {
+  background: transparent;
+}
+
+.str-chat__input-flat {
+  background: #1a1c25;
+  border-top: 1px solid #2d2f39;
+  padding: 1rem;
+}
+
+.str-chat__input-flat-wrapper {
+  background: #2d2f39;
+  border-radius: 0.5rem;
+}
+
+.str-chat__input-flat-text-input {
+  background: transparent;
+  color: white;
+}
+
+.str-chat__input-flat-text-input::placeholder {
+  color: #9ca3af;
+}
+
+.str-chat__send-button {
+  background: #3B82F6;
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.str-chat__message-text {
+  color: white;
+}
+
+.str-chat__message--received .str-chat__message-text-inner {
+  background: #1e1f29;
+  border-radius: 0.5rem;
+}
+
+.str-chat__message--sent .str-chat__message-text-inner {
+  background: #3B82F6;
+  border-radius: 0.5rem;
+}
+
+.str-chat__header-livestream {
+  background: #1a1c25;
+  border-bottom: 1px solid #2d2f39;
+  padding: 1rem;
+}
+
+

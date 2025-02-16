@@ -6,8 +6,10 @@ import { useSelector } from "react-redux";
 import Hero from "./components/Hero";
 import Contact from "./components/Contact";
 import Projects from "./components/Projects";
+import Chat from "./components/Chat";
 import { FaChevronDown } from 'react-icons/fa';
 import { AnimatePresence, motion } from "framer-motion";
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive'; // Install this package: npm install react-responsive
 
 const MainApp = () => {
@@ -16,6 +18,8 @@ const MainApp = () => {
   const [isScrolling, setIsScrolling] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const isMobile = useMediaQuery({ maxWidth: 768 });
+
+  const location = useLocation();
 
   const sections = [
     { component: Hero, name: 'Hero' },
@@ -126,6 +130,13 @@ const MainApp = () => {
 
   const CurrentComponent = sections[currentSection].component;
 
+
+  const isChatPage = location.pathname === '/chat';
+  if (isChatPage) {
+    return <Chat />;
+  }  
+
+
   return (
     <div
       className="h-screen overflow-hidden"
@@ -205,7 +216,11 @@ const MainApp = () => {
 
 const App = () => (
   <Provider store={store}>
-    <MainApp />
+   <Router>
+      <Routes>
+        <Route path="/*" element={<MainApp />} />
+      </Routes>
+    </Router>
   </Provider>
 );
 
