@@ -1,204 +1,180 @@
-import Navbar from "./components/Navbar";
-import { Provider } from "react-redux";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Provider, useSelector } from "react-redux";
+import { useMediaQuery } from "react-responsive";
+
 import store from "./redux/store";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import Navbar from "./components/Navbar";
+import Background from "./components/Background";
+import Footer from "./components/Footer";
 import Hero from "./components/Hero";
-import Contact from "./components/Contact";
+import About from "./components/About";
+import Experience from "./components/Experience";
 import Projects from "./components/Projects";
-import { FaChevronDown } from 'react-icons/fa';
-import { AnimatePresence, motion } from "framer-motion";
-import { useMediaQuery } from 'react-responsive'; // Install this package: npm install react-responsive
+import Contact from "./components/Contact";
+
+const SECTIONS = [
+  { id: "home", name: "Home", component: Hero },
+  { id: "about", name: "About", component: About },
+  { id: "experience", name: "Experience", component: Experience },
+  { id: "projects", name: "Projects", component: Projects },
+  { id: "contact", name: "Contact", component: Contact },
+];
+
+const NAV_OFFSET = 64;
+
+const scrollToSection = (id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+  window.scrollTo({ top, behavior: "smooth" });
+};
 
 const MainApp = () => {
   const darkMode = useSelector((state) => state.theme.darkMode);
-  const [currentSection, setCurrentSection] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [touchStart, setTouchStart] = useState(null);
   const isMobile = useMediaQuery({ maxWidth: 768 });
+  const [activeIndex, setActiveIndex] = useState(0);
+  const offsetsRef = useRef([]);
 
-  const sections = [
-    { component: Hero, name: 'Hero' },
-    { component: Projects, name: 'Projects' },
-    { component: Contact, name: 'Contact' }
-  ];
-
-  useEffect(() => {
-    const handleSetSection = (event) => {
-      if (!isScrolling) {
-        setIsScrolling(true);
-        setCurrentSection(event.detail.sectionIndex);
-        setTimeout(() => setIsScrolling(false), 1000);
-      }
-    };
-
-    window.addEventListener('setSection', handleSetSection);
-
-    return () => {
-      window.removeEventListener('setSection', handleSetSection);
-    };
-  }, [isScrolling]);
+  const sections = useMemo(() => SECTIONS, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  // Handle touch events for mobile
-  const handleTouchStart = (e) => {
-    setTouchStart(e.touches[0].clientY);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!touchStart || isScrolling) return;
-
-    const touchEnd = e.touches[0].clientY;
-    const diff = touchStart - touchEnd;
-
-    if (Math.abs(diff) > 50) { // Minimum swipe distance
-      setIsScrolling(true);
-
-      // Determine direction (up or down)
-      const direction = diff > 0 ? 1 : -1;
-
-      setCurrentSection(prevSection => {
-        const nextSection = prevSection + direction;
-        if (nextSection >= 0 && nextSection < sections.length) {
-          return nextSection;
-        }
-        return prevSection;
-      });
-
-      // Reset touch start
-      setTouchStart(null);
-
-      // Reset scroll lock after delay
-      setTimeout(() => {
-        setIsScrolling(false);
-      }, 1000);
-    }
-  };
-
-  // Handle mouse wheel for desktop
-  const handleWheel = (e) => {
-    if (isScrolling || isMobile) return;
-
-    setIsScrolling(true);
-
-    const direction = e.deltaY > 0 ? 1 : -1;
-
-    setCurrentSection(prevSection => {
-      const nextSection = prevSection + direction;
-      if (nextSection >= 0 && nextSection < sections.length) {
-        return nextSection;
-      }
-      return prevSection;
-    });
-
-    setTimeout(() => {
-      setIsScrolling(false);
-    }, 1000);
-  };
+  const handleNavigate = useCallback(
+    (index) => {
+      if (sections[index]) scrollToSection(sections[index].id);
+    },
+    [sections]
+  );
 
   useEffect(() => {
-    if (!isMobile) {
-      window.addEventListener('wheel', handleWheel, { passive: false });
-      window.addEventListener('wheel', preventDefault, { passive: false });
-    }
-
-    return () => {
-      if (!isMobile) {
-        window.removeEventListener('wheel', handleWheel);
-        window.removeEventListener('wheel', preventDefault);
+    const handleSetSection = (event) => {
+      const idx = event?.detail?.sectionIndex;
+      const targetId = event?.detail?.sectionId;
+      if (typeof idx === "number" && sections[idx]) {
+        scrollToSection(sections[idx].id);
+      } else if (typeof targetId === "string") {
+        scrollToSection(targetId);
       }
     };
-  }, [isScrolling, sections.length, isMobile]);
+    window.addEventListener("setSection", handleSetSection);
+    return () => window.removeEventListener("setSection", handleSetSection);
+  }, [sections]);
 
-  const preventDefault = (e) => {
-    e.preventDefault();
-  };
+  useEffect(() => {
+    const computeOffsets = () => {
+      const scrollY = window.scrollY;
+      offsetsRef.current = sections.map((s) => {
+        const el = document.getElementById(s.id);
+        if (!el) return 0;
+        return el.getBoundingClientRect().top + scrollY;
+      });
+    };
 
-  const getNextSectionName = () => {
-    if (currentSection < sections.length - 1) {
-      return sections[currentSection + 1].name;
-    }
-    return null;
-  };
+    let ticking = false;
+    let lastIndex = -1;
 
-  const CurrentComponent = sections[currentSection].component;
+    const updateActive = () => {
+      ticking = false;
+      const offsets = offsetsRef.current;
+      if (!offsets.length) return;
+      const triggerY = window.scrollY + window.innerHeight * 0.35;
+      let idx = 0;
+      for (let i = 0; i < offsets.length; i += 1) {
+        if (offsets[i] <= triggerY) idx = i;
+        else break;
+      }
+      if (idx !== lastIndex) {
+        lastIndex = idx;
+        setActiveIndex(idx);
+      }
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(updateActive);
+    };
+
+    const onResize = () => {
+      computeOffsets();
+      onScroll();
+    };
+
+    computeOffsets();
+    updateActive();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    window.addEventListener("load", onResize);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("load", onResize);
+    };
+  }, [sections]);
 
   return (
-    <div
-      className="h-screen overflow-hidden"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-    >
-      <Navbar />
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSection}
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -100 }}
-          transition={{ duration: 0.5 }}
-          className="h-[calc(100vh-64px)] flex items-center justify-center relative"
-        >
-          <CurrentComponent />
+    <div className="relative min-h-screen no-tap-highlight">
+      <Background />
 
-          {/* Navigation Dots and Scroll Guide - Hidden on Mobile */}
-          {!isMobile && currentSection < sections.length - 1 && (
-            <motion.div
-              className="fixed right-8 bottom-8 flex flex-col items-center gap-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-            >
-              {/* Scroll Guide */}
-              <div className="text-center">
-                <motion.p
-                  className={`text-sm mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'
-                    }`}
+      <div className="sticky top-0 z-50">
+        <Navbar
+          sections={sections}
+          currentSection={activeIndex}
+          onNavigate={handleNavigate}
+        />
+      </div>
+
+      <main className="relative">
+        {sections.map(({ id, component: Component }) => (
+          <section
+            key={id}
+            id={id}
+            className="min-h-[calc(100vh-64px)] flex items-center justify-center py-12 md:py-16"
+          >
+            <Component />
+          </section>
+        ))}
+      </main>
+
+      {/* Right side section indicator (desktop) */}
+      {!isMobile && (
+        <div className="fixed right-5 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3">
+          {sections.map((section, index) => {
+            const active = index === activeIndex;
+            return (
+              <button
+                key={section.id}
+                type="button"
+                aria-label={`Go to ${section.name}`}
+                onClick={() => handleNavigate(index)}
+                className="group relative flex items-center justify-end"
+              >
+                <span
+                  className={`hidden lg:block mr-3 text-xs font-medium transition-opacity duration-200 ${
+                    active ? "opacity-100" : "opacity-0 group-hover:opacity-70"
+                  } ${darkMode ? "text-gray-300" : "text-gray-600"}`}
                 >
-                  Scroll to {getNextSectionName()}
-                </motion.p>
+                  {section.name}
+                </span>
+                <span
+                  className={`block rounded-full transition-colors duration-200 ${
+                    active
+                      ? "w-2.5 h-8 bg-gradient-to-b from-indigo-500 via-fuchsia-500 to-amber-400"
+                      : darkMode
+                      ? "w-2 h-2 bg-white/30 group-hover:bg-white/60"
+                      : "w-2 h-2 bg-black/20 group-hover:bg-black/50"
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-                {/* Animated Mouse Icon */}
-                <div className={`w-5 h-8 rounded-full border-2 ${darkMode ? 'border-gray-300' : 'border-gray-600'
-                  } mx-auto mb-2 relative`}>
-                  <motion.div
-                    className={`w-1 h-1 rounded-full ${darkMode ? 'bg-gray-300' : 'bg-gray-600'
-                      } absolute left-1/2 top-2 -translate-x-1/2`}
-                    animate={{
-                      y: [0, 10, 0]
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Mobile Navigation Indicator */}
-          {isMobile && (
-            <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
-              <div className="flex gap-2">
-                {sections.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-2 h-2 rounded-full ${currentSection === index
-                        ? 'bg-blue-500'
-                        : darkMode ? 'bg-gray-600' : 'bg-gray-300'
-                      }`}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
+      <Footer />
     </div>
   );
 };

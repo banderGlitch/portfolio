@@ -1,22 +1,97 @@
 @import "tailwindcss";
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+@theme {
+  --font-sans: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+:root {
+  font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
 
-/* Default Light Mode */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 72px;
+}
+
+html,
 body {
-  background-color: white;
-  color: black;
-  transition: background-color 0.5s ease-in-out;
   margin: 0;
   padding: 0;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
 }
 
-/* Dark Mode Styles */
+body {
+  background-color: #ffffff;
+  color: #0f172a;
+  transition: background-color 0.3s ease-out, color 0.2s ease-out;
+  overflow-x: hidden;
+}
+
 .dark body {
-  background-color: black;
-  color: white;
+  background-color: #050816;
+  color: #f8fafc;
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Promote element to its own GPU layer so it doesn't repaint with the page */
+.gpu-layer {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  contain: layout paint;
+}
+
+/* Static gradient text (no per-frame repaint) */
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    #6366f1 0%,
+    #8b5cf6 35%,
+    #ec4899 65%,
+    #f59e0b 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtle grid background */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.dark .grid-bg {
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+}
+
+.no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
